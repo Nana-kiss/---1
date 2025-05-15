@@ -1,0 +1,79 @@
+from pygame import *
+
+class GameSprite(sprite.Sprite):
+    def __init__(self, pl_image, pl_x, pl_y, s_x, s_y, pl_speed):
+        super().__init__()
+        self.image = transform.scale(image.load(pl_image), (s_x,s_y))
+        self.speed = pl_speed
+        self.rect = self.image.get_rect()
+        self.rect.x = pl_x
+        self.rect.y = pl_y
+    def reset(self):
+        win.blit(self.image, (self.rect.x, self.rect.y))
+
+class Player(GameSprite):
+    def update_l(self):
+        keys = key.get_pressed()#нажата ли клавиша
+        if keys[K_w] and self.rect.y > 5:#подключение кнопки и не выходить за пределы 
+            self.rect.y -= self.speed
+        if keys[K_s] and self.rect.y < win_h -80:#подключение кнопки и не выходить за пределы
+            self.rect.y += self.speed
+    def update_r(self):
+        keys = key.get_pressed()#нажата ли клавиша
+        if keys[K_UP] and self.rect.y > 5:#подключение кнопки и не выходить за пределы 
+            self.rect.y -= self.speed
+        if keys[K_DOWN] and self.rect.y < win_h -80:#подключение кнопки и не выходить за пределы
+            self.rect.y += self.speed
+
+fon = (230,225,255)
+win_w = 700
+win_h = 500
+win = display.set_mode((win_w,win_h))
+display.set_caption('Pin-pong')
+win.fill(fon)
+
+player1 = Player('badminton.png', 10, 250, 65, 95, 4)
+player2 = Player('badminton.png', 620, 250, 65, 95, 4)
+ball = GameSprite('ball.png', 100, 100, 30, 30, 5)
+
+speed = 8
+speed_x = 5
+speed_y = 5
+f = False
+game = True
+clock = time.Clock()
+FPS = 60#кол-во кадров в сек
+font.init()
+font1 = font.Font(None, 35)
+lose1 = font1.render('Player 1 LOSE', True, (180,0,0))
+lose2 = font1.render('Player 2 LOSE', True, (180,0,0))
+
+while game:
+    for e in event.get():#произошедшие события в список
+        if e.type == QUIT:#нажата ли кнопка закрыть
+            game  = False
+    if f!= True:
+        win.fill(fon)
+        ball.rect.x += speed_x
+        ball.rect.y += speed_y
+        if ball.rect.y > win_h-50 or ball.rect.y < 0:
+            speed_y *= -1
+        if sprite.collide_rect(player1, ball) or sprite.collide_rect(player2, ball):
+            speed_x *= -1
+        if ball.rect.x < 0:
+            f = True
+            win.blit(lose1, (200, 200))
+        if ball.rect.x > win_w - 30:
+            f = True
+            win.blit(lose2, (200, 200))
+
+
+        player1.update_l()
+        player2.update_r()
+        ball.reset()
+        player1.reset()
+        player2.reset()
+        
+
+    display.update()#обновление экрана
+    clock.tick(FPS)
